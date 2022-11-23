@@ -90,20 +90,23 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
     setState(() {
-      phoneNumbers = phoneNumbers;
+      phoneNumbers = phoneNumbers.toSet().toList(); // this removes duplicates
     });
   }
 
   Future<void> _sendTexts() async {
-    var result = '';
-    result = await sendSMS(message: _controller.text, recipients: phoneNumbers, sendDirect: true).catchError((onError) {
-      print(onError);
-      result = onError.toString();
-      return onError.toString();
-    });
-    setState(() {
-      displayText = result == '' ? 'Success' : result;
-    });
+    for (var i = 0; i < phoneNumbers.length; i++) {
+      var result = '';
+      result = await sendSMS(message: _controller.text, recipients: [phoneNumbers[i]], sendDirect: true).catchError((onError) {
+        print(onError);
+        result = onError.toString();
+        return onError.toString();
+      });
+      setState(() {
+        displayText = '$result ${i + 1}/${phoneNumbers.length}';
+      });
+      await Future.delayed(Duration(seconds: 3));
+    }
   }
 
   @override

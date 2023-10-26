@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String? displayText;
   late TextEditingController _controller;
   bool messageExists = false;
+  List<List<dynamic>>  csvfields = [];
 
   @override
   void initState() {
@@ -77,9 +78,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> parseFile(File file) async {
     final input = file.openRead();
     final fields = await input.transform(utf8.decoder).transform(const CsvToListConverter()).toList();
+    setState(() {
+      csvfields = fields;
+    });
     for (var field in fields) {
       try {
-        var phoneNumber = field[3].toString();
+        var phoneNumber = field[0].toString();
         if (phoneNumber != null && phoneNumber != '') {
           if (isValidPhoneNumber(phoneNumber)) {
             phoneNumbers.add(phoneNumber);
@@ -124,9 +128,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             !filePicked
                 ? const Text(
-                    'You must pick a file',
+                    'You must pick a file. Make sure the phone numbers are in the 0th column (column A)',
                   )
-                : Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                : SingleChildScrollView(child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                     Text(
                       'You will send to ${phoneNumbers.length} numbers',
                     ),
@@ -150,8 +155,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         ? Text(
                             'Result: $displayText',
                           )
-                        : Container()
-                  ])
+                        : Container(),
+
+                    Text(
+                      phoneNumbers.toString(),
+                    ),
+                    Text(
+                      csvfields.toString(),
+                    ),
+                  ]))
           ],
         ),
       ),
